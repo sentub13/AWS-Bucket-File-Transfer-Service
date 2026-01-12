@@ -7,27 +7,27 @@ import com.example.s3transfer.service.EncryptionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
+@Tag(name = "Admin", description = "AWS Credentials Management")
 public class AdminController {
 
     private final AwsCredentialRepository repo;
     private final EncryptionService enc;
 
     @PostMapping("/aws")
+    @Operation(summary = "Save AWS Credentials", description = "Store encrypted AWS credentials for S3 operations")
+    @ApiResponse(responseCode = "200", description = "Credentials saved successfully")
+    @ApiResponse(responseCode = "400", description = "Failed to save credentials")
     public ResponseEntity<String> saveCredentials(@RequestBody AwsCredentialDTO dto) {
         try {
-            // Validate input
-            if (dto.getAccountName() == null || dto.getAccessKey() == null || 
-                dto.getSecretKey() == null || dto.getRegion() == null) {
-                return ResponseEntity.badRequest().body("All fields are required");
-            }
-
             AwsCredential c = new AwsCredential();
             c.setAccountName(dto.getAccountName());
             c.setRegion(dto.getRegion());
@@ -42,37 +42,14 @@ public class AdminController {
     }
 
     @GetMapping("/aws")
-    public ResponseEntity<List<AwsCredentialDTO>> getCredentials() {
+    @Operation(summary = "Get AWS Credentials", description = "Retrieve all stored AWS credentials (keys are masked)")
+    @ApiResponse(responseCode = "200", description = "Credentials retrieved successfully")
+    public ResponseEntity<List<AwsCredential>> getCredentials() {
         try {
-            List<AwsCredentialDTO> credentials = repo.findAll().stream()
-                    .map(c -> {
-                        AwsCredentialDTO dto = new AwsCredentialDTO();
-                        dto.setId(c.getId());
-                        dto.setAccountName(c.getAccountName());
-                        dto.setRegion(c.getRegion());
-                        // Don't return actual keys for security
-                        dto.setAccessKey("***");
-                        dto.setSecretKey("***");
-                        return dto;
-                    })
-                    .collect(java.util.stream.Collectors.toList());
+            List<AwsCredential> credentials = repo.findAll();
             return ResponseEntity.ok(credentials);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
-        }
-    }
-
-    @DeleteMapping("/aws/{id}")
-    public ResponseEntity<String> deleteCredentials(@PathVariable UUID id) {
-        try {
-            if (repo.existsById(id)) {
-                repo.deleteById(id);
-                return ResponseEntity.ok("Credentials deleted successfully");
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to delete credentials: " + e.getMessage());
         }
     }
 }

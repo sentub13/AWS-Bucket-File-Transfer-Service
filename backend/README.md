@@ -11,6 +11,10 @@ A Spring Boot service for seamless file transfers between AWS S3 buckets with se
 - **Async Processing**: Non-blocking file transfers
 - **Status Tracking**: Monitor transfer job progress
 
+Swagger endpoints (after the app runs)
+OpenAPI JSON: http://localhost:8081/v3/api-docs
+Swagger UI: http://localhost:8081/swagger-ui.html or /swagger-ui/index.html
+
 ## Setup
 
 1. **Prerequisites**:

@@ -5,12 +5,14 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.hibernate.annotations.GenericGenerator;
+
 @Entity
 @Table(name = "transfer_jobs")
 @Data
 public class TransferJob {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     private UUID id;
 
     @Column(nullable = false)

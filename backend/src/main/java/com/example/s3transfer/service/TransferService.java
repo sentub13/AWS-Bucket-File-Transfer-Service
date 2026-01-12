@@ -25,14 +25,6 @@ public class TransferService {
             throw new IllegalArgumentException("Source bucket, destination bucket, and file key are required");
         }
 
-        // Validate buckets exist
-        if (!s3Service.bucketExists(req.getSourceBucket())) {
-            throw new RuntimeException("Source bucket does not exist: " + req.getSourceBucket());
-        }
-        if (!s3Service.bucketExists(req.getDestinationBucket())) {
-            throw new RuntimeException("Destination bucket does not exist: " + req.getDestinationBucket());
-        }
-
         TransferJob job = new TransferJob();
         job.setSourceBucket(req.getSourceBucket());
         job.setDestinationBucket(req.getDestinationBucket());

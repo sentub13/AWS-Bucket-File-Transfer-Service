@@ -10,18 +10,28 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.Parameter;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/s3")
 @RequiredArgsConstructor
+@Tag(name = "S3 Operations", description = "S3 bucket file operations")
 public class S3Controller {
 
     private final S3Service s3Service;
 
     @GetMapping("/{bucket}/files")
-    public ResponseEntity<List<String>> listFiles(@PathVariable String bucket) {
+    @Operation(summary = "List Files", description = "List all files in an S3 bucket")
+    @ApiResponse(responseCode = "200", description = "Files listed successfully")
+    @ApiResponse(responseCode = "400", description = "Bucket does not exist")
+    public ResponseEntity<List<String>> listFiles(
+            @Parameter(description = "S3 bucket name", example = "my-bucket")
+            @PathVariable String bucket) {
         if (!s3Service.bucketExists(bucket)) {
             return ResponseEntity.badRequest().build();
         }
@@ -29,9 +39,15 @@ public class S3Controller {
     }
 
     @PostMapping("/{bucket}/upload")
+    @Operation(summary = "Upload File", description = "Upload a file to S3 bucket")
+    @ApiResponse(responseCode = "200", description = "File uploaded successfully")
+    @ApiResponse(responseCode = "400", description = "Upload failed")
     public ResponseEntity<String> uploadFile(
+            @Parameter(description = "S3 bucket name", example = "my-bucket")
             @PathVariable String bucket,
+            @Parameter(description = "File to upload")
             @RequestParam("file") MultipartFile file,
+            @Parameter(description = "Custom file key/name", example = "documents/report.pdf")
             @RequestParam(value = "key", required = false) String key) {
         try {
             String fileKey = key != null ? key : file.getOriginalFilename();
@@ -43,8 +59,13 @@ public class S3Controller {
     }
 
     @GetMapping("/{bucket}/download/{key}")
+    @Operation(summary = "Download File", description = "Download a file from S3 bucket")
+    @ApiResponse(responseCode = "200", description = "File downloaded successfully")
+    @ApiResponse(responseCode = "400", description = "Download failed")
     public ResponseEntity<InputStreamResource> downloadFile(
+            @Parameter(description = "S3 bucket name", example = "my-bucket")
             @PathVariable String bucket,
+            @Parameter(description = "File key/path", example = "documents/report.pdf")
             @PathVariable String key) {
         try {
             ResponseInputStream<GetObjectResponse> s3Object = s3Service.downloadFile(bucket, key);
