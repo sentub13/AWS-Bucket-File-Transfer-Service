@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button, Alert } from '@mui/material';
-import { startTransfer } from '../api/transferApi';
+import { startTransfer, getTransferStatus } from '../api/transferApi';
 
 interface TransferFormProps {
   sourceBucket: string;
@@ -12,10 +12,37 @@ interface TransferFormProps {
 export default function TransferForm({ sourceBucket, destinationBucket, fileKey, onStatusChange }: TransferFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [jobId, setJobId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (jobId) {
+      interval = setInterval(async () => {
+        try {
+          const status = await getTransferStatus(jobId);
+          if (status === 'COMPLETED') {
+            onStatusChange('completed');
+            setJobId(null);
+          } else if (status === 'FAILED') {
+            onStatusChange('error');
+            setError('Transfer failed');
+            setJobId(null);
+          }
+        } catch (err) {
+          console.error('Failed to get transfer status:', err);
+        }
+      }, 2000);
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [jobId, onStatusChange]);
 
   const handleTransfer = async () => {
-    if (!sourceBucket || !fileKey) {
-      setError('Please select a source bucket and file');
+    if (!sourceBucket || !destinationBucket || !fileKey) {
+      setError('Please select source bucket, destination bucket, and file');
       return;
     }
 
@@ -24,14 +51,14 @@ export default function TransferForm({ sourceBucket, destinationBucket, fileKey,
     onStatusChange('transferring');
 
     try {
-      await startTransfer({
+      const transferJobId = await startTransfer({
         sourceBucket,
         destinationBucket,
         fileKey
       });
-      onStatusChange('completed');
+      setJobId(transferJobId);
     } catch (err) {
-      setError('Transfer failed. Please try again.');
+      setError('Transfer failed to start. Please try again.');
       onStatusChange('error');
     } finally {
       setLoading(false);
@@ -44,9 +71,10 @@ export default function TransferForm({ sourceBucket, destinationBucket, fileKey,
       <Button 
         variant="contained" 
         onClick={handleTransfer}
-        disabled={loading || !sourceBucket || !fileKey}
+        disabled={loading || !sourceBucket || !destinationBucket || !fileKey || !!jobId}
+        fullWidth
       >
-        {loading ? 'Transferring...' : 'Start Transfer'}
+        {loading ? 'Starting Transfer...' : jobId ? 'Transfer in Progress...' : 'Start Transfer'}
       </Button>
     </>
   );

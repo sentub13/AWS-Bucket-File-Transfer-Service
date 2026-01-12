@@ -1,6 +1,6 @@
 package com.example.s3transfer.controller;
 
-import com.example.s3transfer.service.S3Service;
+import com.example.s3transfer.service.IS3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -23,19 +23,26 @@ import java.util.List;
 @Tag(name = "S3 Operations", description = "S3 bucket file operations")
 public class S3Controller {
 
-    private final S3Service s3Service;
+    private final IS3Service s3Service;
 
     @GetMapping("/{bucket}/files")
     @Operation(summary = "List Files", description = "List all files in an S3 bucket")
     @ApiResponse(responseCode = "200", description = "Files listed successfully")
     @ApiResponse(responseCode = "400", description = "Bucket does not exist")
-    public ResponseEntity<List<String>> listFiles(
+    public ResponseEntity<?> listFiles(
             @Parameter(description = "S3 bucket name", example = "my-bucket")
             @PathVariable String bucket) {
-        if (!s3Service.bucketExists(bucket)) {
-            return ResponseEntity.badRequest().build();
+        try {
+            if (!s3Service.bucketExists(bucket)) {
+                return ResponseEntity.badRequest().body("Bucket does not exist: " + bucket);
+            }
+            return ResponseEntity.ok(s3Service.listFiles(bucket));
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("No AWS credentials")) {
+                return ResponseEntity.badRequest().body("No AWS credentials configured. Please configure credentials in Admin Panel first.");
+            }
+            return ResponseEntity.badRequest().body("Failed to list files: " + e.getMessage());
         }
-        return ResponseEntity.ok(s3Service.listFiles(bucket));
     }
 
     @PostMapping("/{bucket}/upload")
@@ -50,9 +57,17 @@ public class S3Controller {
             @Parameter(description = "Custom file key/name", example = "documents/report.pdf")
             @RequestParam(value = "key", required = false) String key) {
         try {
+            if (!s3Service.bucketExists(bucket)) {
+                s3Service.createBucket(bucket);
+            }
             String fileKey = key != null ? key : file.getOriginalFilename();
             s3Service.uploadFile(bucket, fileKey, file.getInputStream(), file.getSize());
             return ResponseEntity.ok("File uploaded successfully: " + fileKey);
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("No AWS credentials")) {
+                return ResponseEntity.badRequest().body("No AWS credentials configured. Please configure credentials in Admin Panel first.");
+            }
+            return ResponseEntity.badRequest().body("Upload failed: " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Upload failed: " + e.getMessage());
         }

@@ -17,7 +17,7 @@ import java.util.UUID;
 public class TransferService {
 
     private final TransferJobRepository repo;
-    private final S3Service s3Service;
+    private final IS3Service s3Service;
 
     public UUID startTransfer(TransferRequest req) {
         // Validate input

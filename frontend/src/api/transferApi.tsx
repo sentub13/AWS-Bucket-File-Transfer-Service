@@ -6,16 +6,12 @@ interface TransferRequest {
   fileKey: string;
 }
 
-interface TransferResponse {
-  transferId: string;
-  status: string;
-}
+export const startTransfer = async (data: TransferRequest): Promise<string> => {
+  const response = await api.post<string>('/transfer', data);
+  return response.data;
+};
 
-export const startTransfer = async (data: TransferRequest): Promise<TransferResponse> => {
-  try {
-    const response = await api.post<TransferResponse>('/transfer', data);
-    return response.data;
-  } catch (error) {
-    throw new Error('Transfer failed to start');
-  }
+export const getTransferStatus = async (jobId: string): Promise<string> => {
+  const response = await api.get<string>(`/transfer/${jobId}/status`);
+  return response.data;
 };

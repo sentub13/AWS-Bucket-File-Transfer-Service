@@ -28,7 +28,7 @@ Swagger UI: http://localhost:8081/swagger-ui.html or /swagger-ui/index.html
    ```
 
 3. **Access H2 Console** (development):
-   - URL: http://localhost:8080/h2-console
+   - URL: http://localhost:8081/h2-console
    - JDBC URL: jdbc:h2:mem:testdb
    - Username: sa
    - Password: (empty)

@@ -4,6 +4,7 @@ import com.example.s3transfer.entity.AwsCredential;
 import com.example.s3transfer.repository.AwsCredentialRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -19,7 +20,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class S3Service {
+@Profile("!mock")
+public class S3Service implements IS3Service {
 
     private final EncryptionService encryptionService;
     private final AwsCredentialRepository repo;
@@ -103,6 +105,16 @@ public class S3Service {
             return true;
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    public void createBucket(String bucket) {
+        try {
+            s3().createBucket(CreateBucketRequest.builder().bucket(bucket).build());
+            log.info("Bucket created successfully: {}", bucket);
+        } catch (Exception e) {
+            log.error("Failed to create bucket: {}", bucket, e);
+            throw new RuntimeException("Failed to create bucket: " + e.getMessage());
         }
     }
 }
