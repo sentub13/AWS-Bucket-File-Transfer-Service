@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Service
-@RequiredArgsConstructor
-@Slf4j
+@Service // Marks class as Spring service component - enables dependency injection for file transfer operations
+@RequiredArgsConstructor // Lombok annotation - generates constructor for final fields automatically
+@Slf4j // Lombok annotation - generates logger field automatically for logging transfer operations
 public class TransferService {
 
     private final TransferJobRepository repo;
@@ -38,7 +38,7 @@ public class TransferService {
         return job.getId();
     }
 
-    @Async
+    @Async // Executes method asynchronously in separate thread - prevents blocking main thread during file transfers
     public void performTransferAsync(TransferJob job) {
         try {
             log.info("Starting transfer: {}/{} -> {}/{}", 

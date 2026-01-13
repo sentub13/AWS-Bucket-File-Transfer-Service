@@ -17,10 +17,10 @@ import software.amazon.awssdk.services.s3.model.*;
 import java.io.InputStream;
 import java.util.List;
 
-@Service
-@RequiredArgsConstructor
-@Slf4j
-@Profile("!mock")
+@Service // Marks class as Spring service component - enables dependency injection for real AWS S3 operations
+@RequiredArgsConstructor // Lombok annotation - generates constructor for final fields automatically
+@Slf4j // Lombok annotation - generates logger field automatically for logging S3 operations
+@Profile("!mock") // Activates this bean when 'mock' profile is NOT active - uses real AWS S3 in production
 public class S3Service implements IS3Service {
 
     private final EncryptionService encryptionService;

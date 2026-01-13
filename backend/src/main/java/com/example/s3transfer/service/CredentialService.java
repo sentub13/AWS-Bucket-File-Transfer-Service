@@ -7,14 +7,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@RequiredArgsConstructor
+@Service // Marks class as Spring service component - enables dependency injection and business logic layer
+@RequiredArgsConstructor // Lombok annotation - generates constructor for final fields automatically
 public class CredentialService {
 
     private final AwsCredentialRepository repository;
     private final EncryptionService encryptionService;
 
-    @Transactional
+    @Transactional // Ensures method runs within database transaction - rollback on failure
     public AwsCredential save(AwsCredentialDTO dto) {
         AwsCredential c = new AwsCredential();
         c.setAccountName(dto.getAccountName());

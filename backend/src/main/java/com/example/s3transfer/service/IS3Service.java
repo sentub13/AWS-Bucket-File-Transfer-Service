@@ -6,6 +6,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import java.io.InputStream;
 import java.util.List;
 
+// Interface defining S3 operations contract - no annotations needed for interface definitions
 public interface IS3Service {
     List<String> listFiles(String bucket);
     void uploadFile(String bucket, String key, InputStream inputStream, long contentLength);

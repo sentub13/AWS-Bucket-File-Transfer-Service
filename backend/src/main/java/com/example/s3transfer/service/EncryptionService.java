@@ -10,10 +10,10 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Base64;
 
-@Service
+@Service // Marks class as Spring service component - enables dependency injection for encryption operations
 public class EncryptionService {
 
-    @Value("${app.encryption.key:mySecretKey123456}")
+    @Value("${app.encryption.key:mySecretKey123456}") // Injects property value from config - reads encryption key from application.properties with default fallback
     private String secretKey;
 
     private static final String ALGORITHM = "AES";

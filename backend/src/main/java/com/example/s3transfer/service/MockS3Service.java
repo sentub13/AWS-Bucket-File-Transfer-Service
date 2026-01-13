@@ -15,9 +15,9 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-@Service
-@Profile("mock")
-@Slf4j
+@Service // Marks class as Spring service component - enables dependency injection for S3 operations
+@Profile("mock") // Activates this bean only when 'mock' profile is active - used for testing without real AWS
+@Slf4j // Lombok annotation - generates logger field automatically for logging operations
 public class MockS3Service implements IS3Service {
 
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, byte[]>> mockStorage = new ConcurrentHashMap<>();
