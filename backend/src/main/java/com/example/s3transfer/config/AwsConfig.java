@@ -10,7 +10,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 @Configuration
 public class AwsConfig {
 
-//    @Bean
+//    @Bean // What does it mean?
     public S3Client s3Client() {
         // In a real app, load credentials from secure storage or environment
         AwsBasicCredentials creds = AwsBasicCredentials.create("accessKey", "secretKey");

@@ -28,11 +28,25 @@ public class AdminController {
     @ApiResponse(responseCode = "400", description = "Failed to save credentials")
     public ResponseEntity<String> saveCredentials(@RequestBody AwsCredentialDTO dto) {
         try {
+            // Validate input
+            if (dto.getAccountName() == null || dto.getAccountName().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Account name is required");
+            }
+            if (dto.getAccessKey() == null || dto.getAccessKey().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Access key is required");
+            }
+            if (dto.getSecretKey() == null || dto.getSecretKey().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Secret key is required");
+            }
+            if (dto.getRegion() == null || dto.getRegion().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Region is required");
+            }
+            
             AwsCredential c = new AwsCredential();
-            c.setAccountName(dto.getAccountName());
-            c.setRegion(dto.getRegion());
-            c.setAccessKeyEncrypted(enc.encrypt(dto.getAccessKey()));
-            c.setSecretKeyEncrypted(enc.encrypt(dto.getSecretKey()));
+            c.setAccountName(dto.getAccountName().trim());
+            c.setRegion(dto.getRegion().trim());
+            c.setAccessKeyEncrypted(enc.encrypt(dto.getAccessKey().trim()));
+            c.setSecretKeyEncrypted(enc.encrypt(dto.getSecretKey().trim()));
             repo.save(c);
             
             return ResponseEntity.ok("AWS credentials saved successfully");
